@@ -197,7 +197,7 @@ DecompressBG:
   STA PPUADDR
   LDA #$CA
   STA PPUADDR
-  LDA #%00000001
+  LDA #%00010000
   STA PPUDATA
 
   LDA PPUSTATUS
@@ -213,7 +213,7 @@ DecompressBG:
   STA PPUADDR
   LDA #$CC
   STA PPUADDR
-  LDA #%00000001
+  LDA #%00010000
   STA PPUDATA
 
   LDA PPUSTATUS
@@ -229,7 +229,7 @@ DecompressBG:
   STA PPUADDR
   LDA #$CE
   STA PPUADDR
-  LDA #%00000001
+  LDA #%00010000
   STA PPUDATA
 
   ; --- Row 3 & 4 Attributes ---
@@ -238,7 +238,7 @@ DecompressBG:
   STA PPUADDR
   LDA #$D1
   STA PPUADDR
-  LDA #%00000001
+  LDA #%00010000
   STA PPUDATA
 
   LDA PPUSTATUS
@@ -254,7 +254,7 @@ DecompressBG:
   STA PPUADDR
   LDA #$D3
   STA PPUADDR
-  LDA #%00000001
+  LDA #%00010000
   STA PPUDATA
 
   LDA PPUSTATUS
@@ -270,7 +270,7 @@ DecompressBG:
   STA PPUADDR
   LDA #$D5
   STA PPUADDR
-  LDA #%00000001
+  LDA #%00010000
   STA PPUDATA
 
   LDA PPUSTATUS
@@ -294,7 +294,7 @@ DecompressBG:
   STA PPUADDR
   LDA #$DA
   STA PPUADDR
-  LDA #%00000001
+  LDA #%00010000
   STA PPUDATA
 
   LDA PPUSTATUS
@@ -310,7 +310,7 @@ DecompressBG:
   STA PPUADDR
   LDA #$DC
   STA PPUADDR
-  LDA #%00000001
+  LDA #%00010000
   STA PPUDATA
 
   LDA PPUSTATUS
@@ -326,7 +326,7 @@ DecompressBG:
   STA PPUADDR
   LDA #$DE
   STA PPUADDR
-  LDA #%00000001
+  LDA #%00010000
   STA PPUDATA
 
   ; --- Row 5 & 6 Attributes ---
@@ -335,7 +335,7 @@ DecompressBG:
   STA PPUADDR
   LDA #$E1
   STA PPUADDR
-  LDA #%00000001
+  LDA #%00010000
   STA PPUDATA
 
   LDA PPUSTATUS
@@ -351,7 +351,7 @@ DecompressBG:
   STA PPUADDR
   LDA #$E3
   STA PPUADDR
-  LDA #%00000001
+  LDA #%00010000
   STA PPUDATA
 
   LDA PPUSTATUS
@@ -367,7 +367,7 @@ DecompressBG:
   STA PPUADDR
   LDA #$E5
   STA PPUADDR
-  LDA #%00000001
+  LDA #%00010000
   STA PPUDATA
 
   LDA PPUSTATUS
@@ -391,7 +391,7 @@ DecompressBG:
   STA PPUADDR
   LDA #$EA
   STA PPUADDR
-  LDA #%00000001
+  LDA #%00010000
   STA PPUDATA
 
   LDA PPUSTATUS
@@ -407,7 +407,7 @@ DecompressBG:
   STA PPUADDR
   LDA #$EC
   STA PPUADDR
-  LDA #%00000001
+  LDA #%00010000
   STA PPUDATA
 
   LDA PPUSTATUS
@@ -423,7 +423,7 @@ DecompressBG:
   STA PPUADDR
   LDA #$EE
   STA PPUADDR
-  LDA #%00000001
+  LDA #%00010000
   STA PPUDATA
 
   ; --- Final Row Cleanup ---
@@ -433,7 +433,7 @@ DecompressBG:
   STA PPUADDR
   LDA #$F1
   STA PPUADDR
-  LDA #%00000001
+  LDA #%00010000
   STA PPUDATA
 
   LDA PPUSTATUS
@@ -441,7 +441,7 @@ DecompressBG:
   STA PPUADDR
   LDA #$F3
   STA PPUADDR
-  LDA #%00000001
+  LDA #%00010000
   STA PPUDATA
 
   LDA PPUSTATUS
@@ -449,7 +449,7 @@ DecompressBG:
   STA PPUADDR
   LDA #$F5
   STA PPUADDR
-  LDA #%00000001
+  LDA #%00010000
   STA PPUDATA
 
 vblankwait:       ; wait for another vblank before continuing
@@ -511,7 +511,7 @@ forever:
 .segment "RODATA"
 palettes:
   .byte $22, $0f, $16, $27
-  .byte $22, $0f, $2b, $3c
+  .byte $22, $0f, $16, $27
   .byte $0f, $00, $00, $00
   .byte $0f, $00, $00, $00
 
@@ -521,21 +521,21 @@ palettes:
   .byte $0f, $00, $00, $00
 
 BackgroundData:
-	.byte $55,$55,$55,$55
-  .byte $40,$00,$00,$01
-  .byte $48,$C8,$C8,$C1
-  .byte $40,$00,$00,$01
-	.byte $4C,$8C,$8C,$81
-  .byte $40,$00,$00,$01
-  .byte $48,$C8,$C8,$C1
-  .byte $40,$00,$00,$01
-	.byte $4C,$8C,$8C,$81
-  .byte $40,$00,$00,$01
-  .byte $48,$C8,$C8,$C1
-  .byte $40,$00,$00,$01
-	.byte $4C,$8C,$8C,$81
-  .byte $40,$00,$00,$01
-	.byte $55,$55,$55,$55
+	.byte $AA,$AA,$AA,$AA
+  .byte $AA,$AA,$AA,$AA
+  .byte $55,$55,$55,$55 ; HERE
+  .byte $40,$0A,$A0,$01 ; -
+	.byte $4A,$00,$00,$A1 ; --
+  .byte $48,$00,$00,$21 ; ---
+  .byte $48,$28,$28,$21 ; ----
+  .byte $40,$20,$08,$01 ; -----
+	.byte $40,$20,$08,$01 ; ------ 
+  .byte $40,$20,$08,$01 ; -----
+  .byte $48,$28,$28,$21 ; ----
+  .byte $48,$00,$00,$21 ; ---
+  .byte $4A,$00,$00,$A1 ; --
+  .byte $40,$0A,$A0,$01 ; -
+	.byte $55,$55,$55,$55 ; HERE
 
 .export BackgroundData
 
