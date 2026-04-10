@@ -18,7 +18,9 @@ sleep:              .res 1
 
 ; -- Sprites --
 x_sprite:           .res 1
+x_sprite_prev:      .res 1
 y_sprite:           .res 1
+y_sprite_prev:      .res 1
 
 .exportzp ID_Block, Y_temp, MXindex, MYindex, bit_loop, index, top_half, bottom_half, x_sprite, y_sprite
 
