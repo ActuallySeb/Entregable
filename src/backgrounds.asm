@@ -3,7 +3,6 @@
 
 .segment "ZEROPAGE"
 ; -- Compression --
-Compressed:         .res 60
 ID_Block:           .res 4
 Y_temp:             .res 1
 
@@ -17,7 +16,11 @@ bit_loop:           .res 1
 index:              .res 1
 sleep:              .res 1
 
-.exportzp Compressed, ID_Block, Y_temp, MXindex, MYindex, bit_loop, index, top_half, bottom_half
+; -- Sprites --
+x_sprite:           .res 1
+y_sprite:           .res 1
+
+.exportzp ID_Block, Y_temp, MXindex, MYindex, bit_loop, index, top_half, bottom_half, x_sprite, y_sprite
 
 .segment "CODE"
 .import compress, decompress

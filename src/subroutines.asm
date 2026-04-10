@@ -6,7 +6,7 @@ masked_bit:            .res 1
 X_temp:                .res 1
 ; Y_temp:                .res 1
 
-.importzp Compressed, ID_Block, Y_temp, MXindex, MYindex, bit_loop, index, top_half, bottom_half
+.importzp ID_Block, Y_temp, MXindex, MYindex, bit_loop, index, top_half, bottom_half
 
 .segment "CODE"
 .export compress, decompress
@@ -195,45 +195,6 @@ ExtractLoop:
   RTS
 .endproc
 
-.proc create_index_table
-  TYA
-  PHA
-
-  LDY Y_temp
-  PLA
-  STA Y_temp
-
-  LDA MYindex
-
-  ; CMP #15
-  ; BEQ @exit
-
-  ; CMP #12
-  ; BCC @exit
-  ; BEQ @exit
-
-  ; CMP #8
-  ; BCC @exit
-  ; BEQ @exit
-
-  ; CMP #4
-  ; BCC @exit
-  ; BEQ @exit
-
-
-  @exit:
-  INY
-
-  TYA
-  PHA
-
-  LDY Y_temp
-  PLA
-  STA Y_temp
-
-  RTS
-.endproc
-
 .proc push_blank
   LDA #0
   STA top_half, X
@@ -299,32 +260,3 @@ ExtractLoop:
 
   RTS
 .endproc
-
-; .segment "RODATA"
-; palettes:
-;   .byte $22, $0f, $16, $27
-;   .byte $22, $0f, $2b, $3c
-;   .byte $0f, $00, $00, $00
-;   .byte $0f, $00, $00, $00
-
-;   .byte $22, $0f, $16, $27
-;   .byte $0f, $00, $00, $00
-;   .byte $0f, $00, $00, $00
-;   .byte $0f, $00, $00, $00
-
-; BackgroundData:
-; 	.byte $55,$55,$55,$55
-;   .byte $40,$00,$00,$01
-;   .byte $48,$C8,$C8,$C1
-;   .byte $40,$00,$00,$01
-; 	.byte $4C,$8C,$8C,$81
-;   .byte $40,$00,$00,$01
-;   .byte $48,$C8,$C8,$C1
-;   .byte $40,$00,$00,$01
-; 	.byte $4C,$8C,$8C,$81
-;   .byte $40,$00,$00,$01
-;   .byte $48,$C8,$C8,$C1
-;   .byte $40,$00,$00,$01
-; 	.byte $4C,$8C,$8C,$81
-;   .byte $40,$00,$00,$01
-; 	.byte $55,$55,$55,$55
