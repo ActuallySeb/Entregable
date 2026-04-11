@@ -458,11 +458,14 @@ vblankwait:       ; wait for another vblank before continuing
   STA PPUMASK
 
 main_loop:
+  LDX #0
+  LDY #0
+  LDA 0
+  STA temp1
+  STA temp2
   JSR read_controllers
   JSR move_sprite
 
-  ; LDX #0
-  ; LDY #0
   ; JSR rear
   JSR yawn
 
