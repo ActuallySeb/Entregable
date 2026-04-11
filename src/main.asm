@@ -3,7 +3,7 @@
 
 .segment "ZEROPAGE"
 ; -- Compression --
-ID_Block:           .res 4
+; ID_Block:           .res 4
 Y_temp:             .res 1
 
 
@@ -17,15 +17,31 @@ index:              .res 1
 sleep:              .res 1
 
 ; -- Sprites --
-x_sprite:           .res 1
-x_sprite_prev:      .res 1
-y_sprite:           .res 1
-y_sprite_prev:      .res 1
+sprite_x:           .res 1
+sprite_x_prev:      .res 1
+sprite_y:           .res 1
+sprite_y_prev:      .res 1
 
-.exportzp ID_Block, Y_temp, MXindex, MYindex, bit_loop, index, top_half, bottom_half, x_sprite, y_sprite
+tile_bit_mask:                     .res 1  ; Stores the bitmak of the current sprite being drawn
+flip_state:                        .res 1  ; Stores flip status (0 = normal, 1 = mirrored)
+sprite_tile_array:                 .res 4
+
+index_sprite:                      .res 1
+temp1:                             .res 1
+temp2:                             .res 1
+
+sprite_animation_state:            .res 1
+frame_counter:                     .res 1
+
+pads: .res 1
+prev_pads: .res 1
+
+.exportzp Y_temp, MXindex, MYindex, bit_loop, index, top_half, bottom_half, sprite_x, sprite_y
+.exportzp flip_state, frame_counter, index_sprite, pads, prev_pads, sprite_animation_state, sprite_tile_array
+.exportzp temp1, temp2, tile_bit_mask
 
 .segment "CODE"
-.import compress, decompress
+.import decompress, read_controllers, walk_cycle, move_sprite, rear, yawn
 
 .proc irq_handler
   RTI
@@ -41,6 +57,7 @@ y_sprite_prev:      .res 1
 	STA $2005
 	STA $2005
 
+  DEC sleep
 
   RTI
 .endproc
@@ -71,56 +88,28 @@ load_palettes:
   LDX #$00
   LDA 0
 @init:
+  STA sprite_x
+  STA sprite_y
+  STA frame_counter
+  STA sprite_animation_state
+  STA flip_state
+  STA temp1
+  STA temp2
+  STA pads
+  STA prev_pads
+
   STA bit_loop
   STA top_half, X
   STA bottom_half, X
-  
+
+
   INX
   CPX #32
   BNE @init
 
-; CompressBG:
-;   LDX #$00
-;   LDY #$00
-;   STY Y_temp
-
-;   Loop1:
-;   JSR SkipRow
-;   LDA BackgroundData, X
-  
-;   JSR compress_check
-
-;   CPX #224   ; Offset to first tile in final row
-;   BNE Loop1
-
-;   Loop2:
-;   JSR SkipRow
-;   LDA BackgroundData+$100, X
-  
-;   JSR compress_check
-
-;   CPX #224   ; Offset to first tile in final row
-;   BNE Loop2
-
-;   Loop3:
-;   JSR SkipRow
-;   LDA BackgroundData+$200, X
-  
-;   JSR compress_check
-
-;   CPX #224   ; Offset to first tile in final row
-;   BNE Loop3
-
-;   Loop4:
-;   JSR SkipRow
-;   LDA BackgroundData+$300, X
-  
-;   JSR compress_check
-
-;   CPX #$A0   ; Offset to first tile in final row
-;   BNE Loop4
-
-
+  LDA #$cc
+  STA sprite_x
+  STA sprite_y
 DecompressBG:
   LDX #$00
 @init2:
@@ -457,6 +446,8 @@ DecompressBG:
   LDA #%00000001
   STA PPUDATA
 
+
+
 vblankwait:       ; wait for another vblank before continuing
   BIT PPUSTATUS
   BPL vblankwait
@@ -466,48 +457,23 @@ vblankwait:       ; wait for another vblank before continuing
   LDA #%00011110  ; enable background + sprites
   STA PPUMASK
 
-forever:
-  JMP forever
+main_loop:
+  JSR read_controllers
+  JSR move_sprite
+
+  ; LDX #0
+  ; LDY #0
+  ; JSR rear
+  JSR yawn
+
+sleep_loop:
+  LDA sleep
+  BNE sleep_loop
+
+  INC sleep
+  JMP main_loop
 .endproc
 
-.proc SkipRow
-  LDA MXindex
-  CMP #$04
-  BNE @exit_check
-
-  LDA #0
-  STA MXindex
-
-  TXA
-  CLC
-  ADC #32
-  TAX
-
-  @exit_check:
-  RTS
-.endproc
-
-.proc compress_check
-  STA ID_Block, Y
-  TXA
-  PHA
-  INY
-
-  CPY #$04
-  BNE @continue
-
-  JSR compress
-  LDY #$00
-
-  @continue:
-  PLA
-  TAX
-
-  INX
-  INX
-
-  RTS
-.endproc
 
 
 .segment "VECTORS"
@@ -521,7 +487,7 @@ palettes:
   .byte $0f, $00, $00, $00
 
   .byte $22, $0f, $16, $27
-  .byte $0f, $00, $00, $00
+  .byte $22, $05, $16, $27
   .byte $0f, $00, $00, $00
   .byte $0f, $00, $00, $00
 

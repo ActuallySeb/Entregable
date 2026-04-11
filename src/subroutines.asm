@@ -6,79 +6,10 @@ masked_bit:            .res 1
 X_temp:                .res 1
 ; Y_temp:                .res 1
 
-.importzp ID_Block, Y_temp, MXindex, MYindex, bit_loop, index, top_half, bottom_half
+.importzp Y_temp, MXindex, MYindex, bit_loop, index, top_half, bottom_half
 
 .segment "CODE"
-.export compress, decompress
-
-.proc compress
-  LDX #$00
-  LDY Y_temp
-
-  @comp:
-  LDA ID_Block, X
-  
-  CMP #$00
-  BEQ @option1
-  
-  CMP #$05
-  BEQ @option2
-
-  CMP #$01
-  BEQ @option3
-
-  CMP #$06
-  BEQ @option4
-  
-  @option1: ; 00
-  LDA Compressed, Y
-  ASL
-  ASL
-  STA Compressed, Y
-
-  JMP @comp_loop_end
-
-  @option2: ; 01
-  LDA Compressed, Y
-  ASL
-  ASL
-  CLC
-  ADC #$01
-  STA Compressed, Y
-
-  JMP @comp_loop_end
-
-  @option3: ; 10
-  LDA Compressed, Y
-  ASL
-  ASL
-  CLC
-  ADC #$02
-  STA Compressed, Y
-
-  JMP @comp_loop_end
-
-  @option4: ; 11
-  LDA Compressed, Y
-  ASL
-  ASL
-  CLC
-  ADC #$03
-  STA Compressed, Y
-
-  JMP @comp_loop_end
-
-  @comp_loop_end:
-  INX
-  CPX #$04
-  BNE @comp
-
-  INC Y_temp
-  INC MXindex
-
-  @exit_compress:
-  RTS
-.endproc
+.export decompress
 
 .proc decompress
   LDX #0          ; compressed index

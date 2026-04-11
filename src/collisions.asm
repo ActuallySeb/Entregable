@@ -2,14 +2,13 @@
 .import BackgroundData
 
 .segment "ZEROPAGE"
-; MiXb:                .res 1
-; MYb:                 .res 1
+Collision_tiles:                .res 2
 
-.importzp MXindex, MYindex, index, x_sprite, y_sprite, pads
+.importzp MXindex, MYindex, index, sprite_x, sprite_y, pads
 
 .segment "CODE"
 .proc position_to_Mindex
-  LDA x_sprite
+  LDA sprite_x
 
   LSR
   LSR
@@ -18,7 +17,7 @@
 
   STA MXindex
 
-  LDA y_sprite
+  LDA sprite_y
 
   LSR
   LSR
@@ -26,6 +25,8 @@
   LSR
 
   STA MYindex
+
+  JSR get_collision_tile
 
   LDA MYindex
   ASL
@@ -58,12 +59,19 @@
 
   @right:
     INC MXindex
+    JMP @exit
+
   @left:
     DEC MXindex
+    JMP @exit
+  
   @up:
     DEC MYindex
+    JMP @exit
+  
   @down:
     INC MYindex
+    JMP @exit
 
   @exit:
   RTS

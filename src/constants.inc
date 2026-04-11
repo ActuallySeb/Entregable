@@ -16,3 +16,7 @@ BTN_UP      = %00001000
 BTN_DOWN    = %00000100
 BTN_LEFT    = %00000010
 BTN_RIGHT   = %00000001
+
+; Draw Cycles
+CYCLE       = $30  ;  36 frames
+HALF_CYCLE  = $18  ;  18 frames
