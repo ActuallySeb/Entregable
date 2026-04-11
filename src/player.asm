@@ -2,10 +2,13 @@
 
 
 .segment "ZEROPAGE"
-.importzp sprite_x, sprite_y, pads
+.importzp sprite_x, sprite_y, pads, flip_state
 
 .segment "CODE"
-.export move_sprite
+.import walk_cycle, rear_cycle, forward_cycle, idle
+.export move_sprite, draw_player
+
+
 .proc update_player
 
   JSR move_sprite
@@ -83,5 +86,51 @@
   ADC #2
   STA sprite_y
 
+  RTS
+.endproc
+
+.proc draw_player
+  LDA pads
+  AND #(BTN_RIGHT | BTN_LEFT)
+  BNE @draw_horizontal
+
+  LDA pads
+  AND #BTN_UP
+  BNE @draw_up
+
+  LDA pads
+  AND #BTN_DOWN
+  BNE @draw_down
+
+  JSR  idle
+
+  JMP @exit_draw
+
+  @draw_horizontal:
+    LDA pads
+    AND #BTN_RIGHT
+    BNE @draw_right
+
+    @draw_left:
+    LDA #1
+    STA flip_state
+    JMP @draw_inline
+
+    @draw_right:
+    LDA #0
+    STA flip_state
+
+    @draw_inline:
+    JSR walk_cycle
+    JMP @exit_draw
+
+  @draw_up:
+    JSR rear_cycle
+    JMP @exit_draw
+
+  @draw_down:
+    JSR forward_cycle
+
+  @exit_draw:
   RTS
 .endproc

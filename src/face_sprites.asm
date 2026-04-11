@@ -35,19 +35,19 @@
   JSR set_palette
   LDX #$00
 
-  LDA #$4b ; Tile top left
+  LDA #$5b ; Tile top left
   STA sprite_tile_array, X
   INX
 
-  LDA #$4c ; Tile top right
+  LDA #$5c ; Tile top right
   STA sprite_tile_array, X
   INX
 
-  LDA #$5b ; Tile bottom left
+  LDA #$6b ; Tile bottom left
   STA sprite_tile_array, X
   INX
 
-  LDA #$5c ; Tile bottom right
+  LDA #$6c ; Tile bottom right
   STA sprite_tile_array, X
   INX
 

@@ -41,7 +41,7 @@ prev_pads: .res 1
 .exportzp temp1, temp2, tile_bit_mask
 
 .segment "CODE"
-.import decompress, update_animation, read_controllers, walk_cycle, move_sprite
+.import decompress, update_animation, read_controllers, move_sprite, draw_player
 
 .proc irq_handler
   RTI
@@ -468,7 +468,7 @@ main_loop:
   JSR read_controllers
   JSR move_sprite
 
-  JSR walk_cycle
+  JSR draw_player
 
 sleep_loop:
   LDA sleep
