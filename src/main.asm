@@ -41,13 +41,14 @@ prev_pads: .res 1
 .exportzp temp1, temp2, tile_bit_mask
 
 .segment "CODE"
-.import decompress, read_controllers, walk_cycle, move_sprite, rear, yawn
+.import decompress, update_animation, read_controllers, walk_cycle, move_sprite
 
 .proc irq_handler
   RTI
 .endproc
 
 .proc nmi_handler
+  JSR update_animation
 
   LDA #$00
   STA OAMADDR
@@ -463,11 +464,11 @@ main_loop:
   LDA 0
   STA temp1
   STA temp2
+
   JSR read_controllers
   JSR move_sprite
 
-  ; JSR rear
-  JSR yawn
+  JSR walk_cycle
 
 sleep_loop:
   LDA sleep

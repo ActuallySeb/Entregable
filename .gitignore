@@ -1,0 +1,10 @@
+game.nes.deb
+src/collisions.o
+src/controls.o
+src/draw.o
+src/face_anims.o
+src/face_sprites.o
+src/main.o
+src/player.o
+src/reset.o
+src/subroutines.o

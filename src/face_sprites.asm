@@ -5,7 +5,7 @@
 .segment "CODE"
 .import draw_2x2
 
-.export idle, rear, yawn, happy, lenguetazo, right_1, right_2
+.export idle, rear, flipped_rear, yawn, happy, lenguetazo, right_1, right_2
 
 .proc rear
   JSR set_palette
@@ -24,6 +24,30 @@
   INX
 
   LDA #$4c ; Tile bottom right
+  STA sprite_tile_array, X
+  INX
+
+  JSR draw_2x2
+  RTS
+.endproc
+
+.proc flipped_rear
+  JSR set_palette
+  LDX #$00
+
+  LDA #$4b ; Tile top left
+  STA sprite_tile_array, X
+  INX
+
+  LDA #$4c ; Tile top right
+  STA sprite_tile_array, X
+  INX
+
+  LDA #$5b ; Tile bottom left
+  STA sprite_tile_array, X
+  INX
+
+  LDA #$5c ; Tile bottom right
   STA sprite_tile_array, X
   INX
 
