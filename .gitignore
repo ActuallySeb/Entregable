@@ -9,3 +9,4 @@ src/player.o
 src/reset.o
 src/subroutines.o
 game.nes
+src/coin.o

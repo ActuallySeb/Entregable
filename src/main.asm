@@ -3,7 +3,6 @@
 
 .segment "ZEROPAGE"
 ; -- Compression --
-; ID_Block:           .res 4
 Y_temp:             .res 1
 
 
@@ -17,10 +16,17 @@ index:              .res 1
 sleep:              .res 1
 
 ; -- Sprites --
+player_x:           .res 1
+player_y:           .res 1
+
+coin_x:             .res 1
+coin_y:             .res 1
+
+enemy_x:            .res 1
+enemy_y:            .res 1
+
 sprite_x:           .res 1
-sprite_x_prev:      .res 1
 sprite_y:           .res 1
-sprite_y_prev:      .res 1
 
 tile_bit_mask:                     .res 1  ; Stores the bitmak of the current sprite being drawn
 flip_state:                        .res 1  ; Stores flip status (0 = normal, 1 = mirrored)
@@ -38,10 +44,10 @@ prev_pads:                         .res 1
 
 .exportzp Y_temp, MXindex, MYindex, bit_loop, index, top_half, bottom_half, sprite_x, sprite_y
 .exportzp flip_state, frame_counter, index_sprite, pads, prev_pads, sprite_animation_state, sprite_tile_array
-.exportzp temp1, temp2, tile_bit_mask
+.exportzp temp1, temp2, tile_bit_mask, player_x, player_y, coin_x, coin_y
 
 .segment "CODE"
-.import decompress, set_attr_table, update_animation, read_controllers, update_player, move_sprite, draw_player
+.import decompress, set_attr_table, update_animation, read_controllers, update_player, move_sprite, draw_coin, check_coin_BG_overlay
 
 .proc irq_handler
   RTI
@@ -123,10 +129,15 @@ load_palettes:
   CPX #32
   BNE @init
 
-  LDA #$D0
-  STA sprite_x
+  LDA #$30
+  STA player_x
   LDA #$c6
-  STA sprite_y
+  STA player_y
+
+  LDA #$5f
+  STA coin_x
+  LDA #$70
+  STA coin_y
 DecompressBG:
   LDX #$00
 @init2:
@@ -169,7 +180,9 @@ main_loop:
 
   JSR update_player
 
-  JSR draw_player
+  JSR draw_coin
+  JSR check_coin_BG_overlay
+
 
 sleep_loop:
   LDA sleep
@@ -192,12 +205,12 @@ sleep_loop:
 
 .segment "RODATA"
 palettes:
-  .byte $22, $0f, $2b, $3c
+  .byte $22, $0f, $16, $27
   .byte $22, $0f, $16, $27
   .byte $0f, $00, $00, $00
   .byte $22, $0f, $02, $12
 
-  .byte $22, $0f, $16, $27
+  .byte $22, $0f, $2b, $3c
   .byte $22, $06, $17, $27
   .byte $0f, $00, $00, $00
   .byte $0f, $00, $00, $00

@@ -1,6 +1,5 @@
 .segment  "ZEROPAGE"
-.importzp sprite_x, sprite_y, tile_bit_mask, flip_state, sprite_tile_array
-.importzp index_sprite, temp1, temp2
+.importzp tile_bit_mask, sprite_tile_array
 
 .segment "CODE"
 .import draw_2x2

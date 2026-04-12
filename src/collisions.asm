@@ -5,39 +5,48 @@
 Collision_tiles:                .res 4
 
 .exportzp Collision_tiles
-.importzp MXindex, MYindex, index, sprite_x, sprite_y, pads, temp1
+.importzp MXindex, MYindex, index, sprite_x, sprite_y, pads, temp1, player_x, player_y, coin_x, coin_y
 
 .segment "CODE"
-.export check_BG_collisions, get_collision_tile
+.export check_player_BG_collisions, check_coin_BG_overlay
 
-.proc check_BG_collisions
-  LDA sprite_x
+.proc check_player_BG_collisions
+  JSR position_to_Mindex
 
-  LSR
-  LSR
-  LSR
-  LSR
-
-  STA MXindex ; used as metatile per row
-
-  LDA sprite_y
-
-  LSR
-  LSR
-  LSR
-  LSR
-
-  STA MYindex
-
+  LDA #0
+  STA temp1
   JSR get_collision_tile
 
   RTS
 .endproc
 
-.proc get_collision_tile
+.proc check_coin_BG_overlay
+  LDA coin_x
+  STA sprite_x
+
+  LDA coin_y
+  STA sprite_y
+
+  JSR position_to_Mindex
+
   LDA #0
   STA temp1
+  
+  JSR get_tile
 
+  JSR INC_MXindex
+  JSR get_tile
+
+  INC MYindex
+  JSR get_tile
+
+  JSR DEC_MXindex
+  JSR get_tile
+
+  RTS
+.endproc
+
+.proc get_collision_tile
   LDA pads
   AND #BTN_RIGHT
   BNE @right
@@ -149,12 +158,35 @@ Collision_tiles:                .res 4
 
   LDY temp1
   STA Collision_tiles, Y
+  STA $0330,Y
   INC temp1
 
   PLA
   TAX
   PLA
   TAY
+
+  RTS
+.endproc
+
+.proc position_to_Mindex
+  LDA sprite_x
+
+  LSR
+  LSR
+  LSR
+  LSR
+
+  STA MXindex ; used as metatile per row
+
+  LDA sprite_y
+
+  LSR
+  LSR
+  LSR
+  LSR
+
+  STA MYindex
 
   RTS
 .endproc

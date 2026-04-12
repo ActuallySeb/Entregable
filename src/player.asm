@@ -5,23 +5,26 @@
 prev_x:                    .res 1
 prev_y:                    .res 1
 
-.importzp sprite_x, sprite_y, pads, flip_state, Collision_tiles
+.importzp sprite_x, sprite_y, pads, flip_state, Collision_tiles, player_x, player_y
 
 .segment "CODE"
-.import walk_cycle, rear_cycle, forward_cycle, idle, check_BG_collisions
-.export update_player, move_sprite, draw_player
+.import walk_cycle, rear_cycle, forward_cycle, idle, check_player_BG_collisions
+.export update_player, move_sprite
 
 
 .proc update_player
-  LDA sprite_x
+  LDA player_x
+  STA sprite_x
   STA prev_x
-  LDA sprite_y
+
+  LDA player_y
+  STA sprite_y
   STA prev_y
 
   LDX #0
   JSR move_sprite
-  JSR check_BG_collisions
-  
+  JSR check_player_BG_collisions
+
   LDX #0
   @check_tiles:
     LDA Collision_tiles, X
@@ -39,13 +42,17 @@ prev_y:                    .res 1
     STA sprite_x
     LDA prev_y
     STA sprite_y
-  ; LDA Collision_tiles, X
-  ; CMP #0
-  ; BNE @exit_update
-
 
   @exit_update:
-  RTS
+    LDA sprite_x
+    STA player_x
+
+    LDA sprite_y
+    STA player_y
+
+    JSR draw_player
+
+    RTS
 .endproc
 
 .proc move_sprite
