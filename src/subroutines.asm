@@ -92,7 +92,7 @@ ExtractLoop:
   JMP @exit_compare
 
   @C_option4:
-  JSR push_star
+  JSR push_floor_tile
 
   @exit_compare:
   STX index
@@ -174,17 +174,17 @@ ExtractLoop:
   RTS
 .endproc
 
-.proc push_star
-  LDA #6
+.proc push_floor_tile
+  LDA #10
   STA top_half, X
-  LDA #8
+  LDA #12
   STA bottom_half, X
 
   INX
 
-  LDA #7
+  LDA #11
   STA top_half, X
-  LDA #9
+  LDA #13
   STA bottom_half, X
 
   INX
