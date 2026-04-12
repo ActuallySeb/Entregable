@@ -2,7 +2,10 @@
 
 
 .segment "ZEROPAGE"
-.importzp sprite_x, sprite_y, pads, flip_state, Mxindex, MYindex;, Collision_tiles
+prev_x:                    .res 1
+prev_y:                    .res 1
+
+.importzp sprite_x, sprite_y, pads, flip_state, Collision_tiles
 
 .segment "CODE"
 .import walk_cycle, rear_cycle, forward_cycle, idle, position_to_Mindex
@@ -10,21 +13,36 @@
 
 
 .proc update_player
+  LDA sprite_x
+  STA prev_x
+  LDA sprite_y
+  STA prev_y
+
+  LDX #0
+  JSR move_sprite
   JSR position_to_Mindex
   
   LDX #0
   @check_tiles:
-  LDA Collision_tiles, X
-  INX
-  CMP #0
-  BNE @exit_update
+    LDA Collision_tiles, X
+    INX
+    CMP #0
+    BNE @restore_sprite
 
-  LDA Collision_tiles, X
-  CMP #0
-  BNE @exit_update
+    CPX #2
+    BNE @check_tiles
 
-  LDX #0
-  JSR move_sprite
+    JMP @exit_update
+
+  @restore_sprite:
+    LDA prev_x
+    STA sprite_x
+    LDA prev_y
+    STA sprite_y
+  ; LDA Collision_tiles, X
+  ; CMP #0
+  ; BNE @exit_update
+
 
   @exit_update:
   RTS

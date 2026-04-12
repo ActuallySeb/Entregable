@@ -7,7 +7,6 @@ OAMADDR   = $2003
 OAMDMA    = $4014
 
 Pause     = $0300
-Collision_tiles =                $0320
 
 
 ; Controllers

@@ -2,9 +2,9 @@
 .import BackgroundData
 
 .segment "ZEROPAGE"
-; Collision_tiles:                .res 2
+Collision_tiles:                .res 2
 
-; .exportzp Collision_tiles
+.exportzp Collision_tiles
 .importzp MXindex, MYindex, index, sprite_x, sprite_y, pads, temp1
 
 .segment "CODE"
@@ -109,13 +109,11 @@
 
 .proc get_tile
   LDA MYindex
-  STA $0310
   ASL
   ASL
   STA index
 
   LDA MXindex
-  STA $0311
   LSR
   LSR
   CLC
@@ -131,19 +129,10 @@
   LDY index
   LDA MXindex
   AND #%00000011
-  ; @reduce_below_4:
-  ; CMP #4
-  ; BCC @retrieve
-  
-  ; SEC
-  ; SBC #4
-  ; JMP @reduce_below_4
 
   @retrieve:
   TAX
-  STA $0315
   LDA BackgroundData, Y
-  STA $0305
 
   @shift_left:
   CPX #0
@@ -157,7 +146,6 @@
   
   @mask:
   AND #%11000000
-  STA $0306
 
   LSR
   LSR
@@ -165,13 +153,10 @@
   LSR
   LSR
   LSR
-
-  STA $0307
 
   LDY temp1
   STA Collision_tiles, Y
-  STA $0304
-  INY
+  INC temp1
 
   PLA
   TAX
