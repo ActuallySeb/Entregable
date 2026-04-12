@@ -151,18 +151,13 @@ load_palettes:
 
   LDA #$30
   STA player_x
-  LDA #$c6
+  LDA #$30
   STA player_y
 
   LDA #$5f
   STA coin_x
   LDA #$70
   STA coin_y
-
-  ; LDA #$D0
-  ; STA sprite_x
-  ; LDA #$C6
-  ; STA sprite_y
 
   LDA #$40
   STA enemy_x
@@ -202,6 +197,7 @@ vblankwait:
   LDA #%00011110
   STA PPUMASK
 
+  JSR randomize_coin
 main_loop:
   LDX #0
   LDY #0
@@ -210,15 +206,16 @@ main_loop:
   STA temp2
 
   JSR update_player
+
+  JSR draw_coin
+
+
   JSR handle_player_damage
   JSR resolve_player_enemy_bodyblock
   JSR update_enemy
   JSR handle_player_damage
 
-  ; JSR randomize_coin
-  JSR draw_coin
 
-  ; JSR draw_player
   JSR draw_enemy
 
 sleep_loop:

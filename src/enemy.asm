@@ -10,7 +10,7 @@ enemy_index:              .res 1
 enemy_temp1:              .res 1
 EnemyCollision_tiles:     .res 2
 
-.importzp enemy_x, enemy_y, sprite_x, sprite_y, frame_counter
+.importzp enemy_x, enemy_y, sprite_x, sprite_y, frame_counter, temp2
 
 .segment "CODE"
 .import enemy_overlaps_player, handle_player_damage
@@ -120,15 +120,15 @@ EnemyCollision_tiles:     .res 2
   BEQ @exit_move_x
   BCC @move_right
 
-@move_left:
-  DEC enemy_x
-  RTS
+  @move_left:
+    DEC enemy_x
+    RTS
 
-@move_right:
-  INC enemy_x
+  @move_right:
+    INC enemy_x
 
-@exit_move_x:
-  RTS
+  @exit_move_x:
+    RTS
 .endproc
 
 .proc move_enemy_y
@@ -137,15 +137,15 @@ EnemyCollision_tiles:     .res 2
   BEQ @exit_move_y
   BCC @move_down
 
-@move_up:
-  DEC enemy_y
-  RTS
+  @move_up:
+    DEC enemy_y
+    RTS
 
-@move_down:
-  INC enemy_y
+  @move_down:
+    INC enemy_y
 
-@exit_move_y:
-  RTS
+  @exit_move_y:
+    RTS
 .endproc
 
 .proc position_to_enemy_Mindex
@@ -181,55 +181,55 @@ EnemyCollision_tiles:     .res 2
   BEQ @check_vertical
   BCC @left
 
-@right:
-  INC enemy_mt_x
-  JSR get_enemy_tile
+  @right:
+    INC enemy_mt_x
+    JSR get_enemy_tile
 
-  INC enemy_mt_y
-  JSR get_enemy_tile
+    INC enemy_mt_y
+    JSR get_enemy_tile
 
-  DEC enemy_mt_x
-  DEC enemy_mt_y
-  JMP @exit
+    DEC enemy_mt_x
+    DEC enemy_mt_y
+    JMP @exit
 
-@check_vertical:
-  LDA enemy_y
-  CMP enemy_prev_y
-  BEQ @exit
-  BCC @up
+  @check_vertical:
+    LDA enemy_y
+    CMP enemy_prev_y
+    BEQ @exit
+    BCC @up
 
-@down:
-  INC enemy_mt_y
-  JSR get_enemy_tile
+  @down:
+    INC enemy_mt_y
+    JSR get_enemy_tile
 
-  INC enemy_mt_x
-  JSR get_enemy_tile
+    INC enemy_mt_x
+    JSR get_enemy_tile
 
-  DEC enemy_mt_y
-  DEC enemy_mt_x
-  JMP @exit
+    DEC enemy_mt_y
+    DEC enemy_mt_x
+    JMP @exit
 
-@left:
-  JSR get_enemy_tile
+  @left:
+    JSR get_enemy_tile
 
-  INC enemy_mt_y
-  JSR get_enemy_tile
+    INC enemy_mt_y
+    JSR get_enemy_tile
 
-  DEC enemy_mt_y
-  JMP @exit
+    DEC enemy_mt_y
+    JMP @exit
 
-@up:
-  JSR get_enemy_tile
+  @up:
+    JSR get_enemy_tile
 
-  INC enemy_mt_x
-  JSR get_enemy_tile
+    INC enemy_mt_x
+    JSR get_enemy_tile
 
-  DEC enemy_mt_x
+    DEC enemy_mt_x
 
-@exit:
-  LDA #0
-  STA enemy_temp1
-  RTS
+  @exit:
+    LDA #0
+    STA enemy_temp1
+    RTS
 .endproc
 
 .proc get_enemy_tile
@@ -254,43 +254,43 @@ EnemyCollision_tiles:     .res 2
   LDA enemy_mt_x
   AND #%00000011
 
-@retrieve:
-  TAX
-  LDA BackgroundData, Y
+  @retrieve:
+    TAX
+    LDA BackgroundData, Y
 
-@shift_left:
-  CPX #0
-  BEQ @mask
+  @shift_left:
+    CPX #0
+    BEQ @mask
 
-  ASL
-  ASL
-  DEX
-  JMP @shift_left
+    ASL
+    ASL
+    DEX
+    JMP @shift_left
 
-@mask:
-  AND #%11000000
+  @mask:
+    AND #%11000000
 
-  LSR
-  LSR
-  LSR
-  LSR
-  LSR
-  LSR
+    LSR
+    LSR
+    LSR
+    LSR
+    LSR
+    LSR
 
-  LDY enemy_temp1
-  STA EnemyCollision_tiles, Y
-  INC enemy_temp1
+    LDY enemy_temp1
+    STA EnemyCollision_tiles, Y
+    INC enemy_temp1
 
-  PLA
-  TAX
-  PLA
-  TAY
+    PLA
+    TAX
+    PLA
+    TAY
 
-  RTS
+    RTS
 .endproc
 
 .proc draw_enemy
-  LDX #$10
+  LDX temp2
 
   LDA enemy_y
   STA $0200, X
@@ -350,6 +350,7 @@ EnemyCollision_tiles:     .res 2
   CLC
   ADC #8
   STA $0203, X
+  STX temp2
 
   RTS
 .endproc
