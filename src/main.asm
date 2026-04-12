@@ -27,6 +27,9 @@ enemy_y:            .res 1
 player_prev_x:      .res 1
 player_prev_y:      .res 1
 
+lives:              .res 1
+damage_cooldown:    .res 1
+
 tile_bit_mask:                     .res 1  ; Stores the bitmak of the current sprite being drawn
 flip_state:                        .res 1  ; Stores flip status (0 = normal, 1 = mirrored)
 sprite_tile_array:                 .res 4
@@ -44,12 +47,14 @@ prev_pads:                         .res 1
 .exportzp Y_temp, MXindex, MYindex, bit_loop, index, top_half, bottom_half, sprite_x, sprite_y
 .exportzp flip_state, frame_counter, index_sprite, pads, prev_pads, sprite_animation_state, sprite_tile_array
 .exportzp temp1, temp2, tile_bit_mask, enemy_x, enemy_y
-.exportzp player_prev_x, player_prev_y
+.exportzp player_prev_x, player_prev_y, lives, damage_cooldown
 
 .segment "CODE"
 .import decompress, set_attr_table, update_animation, read_controllers, update_player, draw_player
 .import update_enemy, draw_enemy
-.import resolve_player_enemy_bodyblock
+.import resolve_player_enemy_bodyblock, enemy_overlaps_player
+.import draw_lives_bg
+.import handle_player_damage
 
 .proc irq_handler
   RTI
@@ -58,6 +63,7 @@ prev_pads:                         .res 1
 .proc nmi_handler
   JSR update_animation
   JSR read_controllers
+  JSR draw_lives_bg
 
   LDA #$00
   STA OAMADDR
@@ -69,6 +75,11 @@ prev_pads:                         .res 1
 
   LDA #0
   STA sleep
+
+  LDA damage_cooldown
+  BEQ @no_damage_tick
+  DEC damage_cooldown
+@no_damage_tick:
 
   LDA prev_pads
   AND #BTN_START
@@ -122,6 +133,8 @@ load_palettes:
   STA temp2
   STA pads
   STA Pause
+  STA lives
+  STA damage_cooldown
 
   STA bit_loop
   STA top_half, X
@@ -141,6 +154,9 @@ load_palettes:
   LDA #$40
   STA enemy_y
 
+  LDA #3
+  STA lives
+
 DecompressBG:
   LDX #$00
 @init2:
@@ -154,9 +170,8 @@ DecompressBG:
   CPX #32
   BNE @init2
 
-  LDA PPUSTATUS      ; reset PPU latch
-
-  LDA #$20           ; nametable $2000
+  LDA PPUSTATUS
+  LDA #$20
   STA PPUADDR
   LDA #$00
   STA PPUADDR
@@ -181,8 +196,10 @@ main_loop:
   STA temp2
 
   JSR update_player
+  JSR handle_player_damage
   JSR resolve_player_enemy_bodyblock
   JSR update_enemy
+  JSR handle_player_damage
 
   JSR draw_player
   JSR draw_enemy

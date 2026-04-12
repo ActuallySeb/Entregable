@@ -12,9 +12,8 @@ EnemyCollision_tiles:     .res 2
 
 .importzp enemy_x, enemy_y, sprite_x, sprite_y, frame_counter
 
-
 .segment "CODE"
-.import enemy_overlaps_player
+.import enemy_overlaps_player, handle_player_damage
 .export update_enemy, draw_enemy
 
 .proc update_enemy
@@ -103,6 +102,8 @@ EnemyCollision_tiles:     .res 2
 @check_bodyblock:
   JSR enemy_overlaps_player
   BEQ @done
+
+  JSR handle_player_damage
 
   LDA enemy_prev_x
   STA enemy_x
