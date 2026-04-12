@@ -192,7 +192,7 @@ sleep_loop:
 
 .segment "RODATA"
 palettes:
-  .byte $22, $0f, $16, $27
+  .byte $22, $0f, $2b, $3c
   .byte $22, $0f, $16, $27
   .byte $0f, $00, $00, $00
   .byte $22, $0f, $02, $12

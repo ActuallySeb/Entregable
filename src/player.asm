@@ -8,7 +8,7 @@ prev_y:                    .res 1
 .importzp sprite_x, sprite_y, pads, flip_state, Collision_tiles
 
 .segment "CODE"
-.import walk_cycle, rear_cycle, forward_cycle, idle, position_to_Mindex
+.import walk_cycle, rear_cycle, forward_cycle, idle, check_BG_collisions
 .export update_player, move_sprite, draw_player
 
 
@@ -20,7 +20,7 @@ prev_y:                    .res 1
 
   LDX #0
   JSR move_sprite
-  JSR position_to_Mindex
+  JSR check_BG_collisions
   
   LDX #0
   @check_tiles:

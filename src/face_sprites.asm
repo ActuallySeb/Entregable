@@ -200,7 +200,7 @@
 .endproc
 
 .proc set_palette
-  LDA #$01 ; Bulbasaur color palette
+  LDA #$01
   STA tile_bit_mask
 
   RTS

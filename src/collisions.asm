@@ -2,15 +2,15 @@
 .import BackgroundData
 
 .segment "ZEROPAGE"
-Collision_tiles:                .res 2
+Collision_tiles:                .res 4
 
 .exportzp Collision_tiles
 .importzp MXindex, MYindex, index, sprite_x, sprite_y, pads, temp1
 
 .segment "CODE"
-.export position_to_Mindex, get_collision_tile
+.export check_BG_collisions, get_collision_tile
 
-.proc position_to_Mindex
+.proc check_BG_collisions
   LDA sprite_x
 
   LSR
