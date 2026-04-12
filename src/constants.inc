@@ -6,6 +6,8 @@ PPUDATA   = $2007
 OAMADDR   = $2003
 OAMDMA    = $4014
 
+Pause     = $0300
+
 ; Controllers
 CONTROLLER1 = $4016
 BTN_A       = %10000000

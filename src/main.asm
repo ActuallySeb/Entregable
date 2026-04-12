@@ -33,15 +33,15 @@ temp2:                             .res 1
 sprite_animation_state:            .res 1
 frame_counter:                     .res 1
 
-pads: .res 1
-prev_pads: .res 1
+pads:                              .res 1
+prev_pads:                         .res 1
 
 .exportzp Y_temp, MXindex, MYindex, bit_loop, index, top_half, bottom_half, sprite_x, sprite_y
 .exportzp flip_state, frame_counter, index_sprite, pads, prev_pads, sprite_animation_state, sprite_tile_array
 .exportzp temp1, temp2, tile_bit_mask
 
 .segment "CODE"
-.import decompress, update_animation, read_controllers, move_sprite, draw_player
+.import decompress, set_attr_table, update_animation, read_controllers, move_sprite, draw_player
 
 .proc irq_handler
   RTI
@@ -49,6 +49,7 @@ prev_pads: .res 1
 
 .proc nmi_handler
   JSR update_animation
+  JSR read_controllers
 
   LDA #$00
   STA OAMADDR
@@ -58,8 +59,22 @@ prev_pads: .res 1
 	STA $2005
 	STA $2005
 
-  DEC sleep
+  LDA #0
+  STA sleep
 
+  LDA prev_pads
+  AND #BTN_START
+  BNE @no_pause
+
+  LDA pads
+  AND #BTN_START
+  BEQ @no_pause
+
+  LDA Pause
+  EOR #1
+  STA Pause
+
+  @no_pause:
   RTI
 .endproc
 
@@ -97,7 +112,7 @@ load_palettes:
   STA temp1
   STA temp2
   STA pads
-  STA prev_pads
+  STA Pause
 
   STA bit_loop
   STA top_half, X
@@ -133,321 +148,7 @@ DecompressBG:
 
   JSR decompress
 
-
-
-@attributes:
-  ; finally, attribute table. These addresses don't match the actual characters
-	LDA PPUSTATUS
-	LDA #$23
-	STA PPUADDR
-	LDA #$c2
-	STA PPUADDR
-	LDA #%01000000
-	STA PPUDATA
-
-	LDA PPUSTATUS
-	LDA #$23
-	STA PPUADDR
-	LDA #$e0
-	STA PPUADDR
-	LDA #%00001100
-	STA PPUDATA
-
-  ; --- Row 1 & 2 Attributes ---
-  ; This row handles the split between Row 1 and Row 2 metatiles
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$C2
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$C4
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$C6
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$C9
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$CA
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$CB
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$CC
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$CD
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$CE
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  ; --- Row 3 & 4 Attributes ---
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$D1
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$D2
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$D3
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$D4
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$D5
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$D6
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$D9
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$DA
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$DB
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$DC
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$DD
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$DE
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  ; --- Row 5 & 6 Attributes ---
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$E1
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$E2
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$E3
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$E4
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$E5
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$E6
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$E9
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$EA
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$EB
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$EC
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$ED
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$EE
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  ; --- Final Row Cleanup ---
-  ; This colors the bottom of the very last row
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$F1
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$F3
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-  LDA PPUSTATUS
-  LDA #$23
-  STA PPUADDR
-  LDA #$F5
-  STA PPUADDR
-  LDA #%00010000
-  STA PPUDATA
-
-
+  JSR set_attr_table
 
 vblankwait:       ; wait for another vblank before continuing
   BIT PPUSTATUS
@@ -465,7 +166,6 @@ main_loop:
   STA temp1
   STA temp2
 
-  JSR read_controllers
   JSR move_sprite
 
   JSR draw_player
@@ -474,7 +174,13 @@ sleep_loop:
   LDA sleep
   BNE sleep_loop
 
-  INC sleep
+  LDA #1
+  STA sleep
+
+  @paused:
+  LDA Pause
+  BNE @paused
+
   JMP main_loop
 .endproc
 
