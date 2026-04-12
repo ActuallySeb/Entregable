@@ -1,9 +1,7 @@
 .include "constants.inc"
 
-
 .segment "ZEROPAGE"
-prev_x:                    .res 1
-prev_y:                    .res 1
+.importzp player_prev_x, player_prev_y
 
 .importzp sprite_x, sprite_y, pads, flip_state, Collision_tiles
 
@@ -14,9 +12,9 @@ prev_y:                    .res 1
 
 .proc update_player
   LDA sprite_x
-  STA prev_x
+  STA player_prev_x
   LDA sprite_y
-  STA prev_y
+  STA player_prev_y
 
   LDX #0
   JSR move_sprite
@@ -35,14 +33,10 @@ prev_y:                    .res 1
     JMP @exit_update
 
   @restore_sprite:
-    LDA prev_x
+    LDA player_prev_x
     STA sprite_x
-    LDA prev_y
+    LDA player_prev_y
     STA sprite_y
-  ; LDA Collision_tiles, X
-  ; CMP #0
-  ; BNE @exit_update
-
 
   @exit_update:
   RTS

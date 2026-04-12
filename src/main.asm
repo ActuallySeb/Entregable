@@ -6,7 +6,6 @@
 ; ID_Block:           .res 4
 Y_temp:             .res 1
 
-
 ; --Decompression --
 top_half:           .res 32
 bottom_half:        .res 32
@@ -21,6 +20,12 @@ sprite_x:           .res 1
 sprite_x_prev:      .res 1
 sprite_y:           .res 1
 sprite_y_prev:      .res 1
+
+enemy_x:            .res 1
+enemy_y:            .res 1
+
+player_prev_x:      .res 1
+player_prev_y:      .res 1
 
 tile_bit_mask:                     .res 1  ; Stores the bitmak of the current sprite being drawn
 flip_state:                        .res 1  ; Stores flip status (0 = normal, 1 = mirrored)
@@ -38,10 +43,13 @@ prev_pads:                         .res 1
 
 .exportzp Y_temp, MXindex, MYindex, bit_loop, index, top_half, bottom_half, sprite_x, sprite_y
 .exportzp flip_state, frame_counter, index_sprite, pads, prev_pads, sprite_animation_state, sprite_tile_array
-.exportzp temp1, temp2, tile_bit_mask
+.exportzp temp1, temp2, tile_bit_mask, enemy_x, enemy_y
+.exportzp player_prev_x, player_prev_y
 
 .segment "CODE"
-.import decompress, set_attr_table, update_animation, read_controllers, update_player, move_sprite, draw_player
+.import decompress, set_attr_table, update_animation, read_controllers, update_player, draw_player
+.import update_enemy, draw_enemy
+.import resolve_player_enemy_bodyblock
 
 .proc irq_handler
   RTI
@@ -100,12 +108,13 @@ load_palettes:
   CPX #$20
   BNE load_palettes
 
-
   LDX #$00
-  LDA 0
+  LDA #0
 @init:
   STA sprite_x
   STA sprite_y
+  STA enemy_x
+  STA enemy_y
   STA frame_counter
   STA sprite_animation_state
   STA flip_state
@@ -118,15 +127,20 @@ load_palettes:
   STA top_half, X
   STA bottom_half, X
 
-
   INX
   CPX #32
   BNE @init
 
   LDA #$D0
   STA sprite_x
-  LDA #$c6
+  LDA #$C6
   STA sprite_y
+
+  LDA #$40
+  STA enemy_x
+  LDA #$40
+  STA enemy_y
+
 DecompressBG:
   LDX #$00
 @init2:
@@ -148,28 +162,30 @@ DecompressBG:
   STA PPUADDR
 
   JSR decompress
-
   JSR set_attr_table
 
-vblankwait:       ; wait for another vblank before continuing
+vblankwait:
   BIT PPUSTATUS
   BPL vblankwait
 
-  LDA #%10000000  ; enable NMI, background uses pattern table $0000
+  LDA #%10000000
   STA PPUCTRL
-  LDA #%00011110  ; enable background + sprites
+  LDA #%00011110
   STA PPUMASK
 
 main_loop:
   LDX #0
   LDY #0
-  LDA 0
+  LDA #0
   STA temp1
   STA temp2
 
   JSR update_player
+  JSR resolve_player_enemy_bodyblock
+  JSR update_enemy
 
   JSR draw_player
+  JSR draw_enemy
 
 sleep_loop:
   LDA sleep
@@ -185,8 +201,6 @@ sleep_loop:
   JMP main_loop
 .endproc
 
-
-
 .segment "VECTORS"
 .addr nmi_handler, reset_handler, irq_handler
 
@@ -194,30 +208,30 @@ sleep_loop:
 palettes:
   .byte $22, $0f, $16, $27
   .byte $22, $0f, $16, $27
-  .byte $0f, $00, $00, $00
-  .byte $0f, $00, $00, $00
+  .byte $22, $0f, $16, $27
+  .byte $22, $0f, $02, $12
 
   .byte $22, $0f, $16, $27
-  .byte $22, $05, $16, $27
-  .byte $0f, $00, $00, $00
-  .byte $0f, $00, $00, $00
+  .byte $22, $06, $17, $27
+  .byte $22, $0f, $16, $27
+  .byte $22, $0f, $16, $27
 
 BackgroundData:
-	.byte $AA,$AA,$AA,$AA
-  .byte $AA,$AA,$AA,$AA
-  .byte $55,$55,$55,$55 ; HERE
-  .byte $40,$0A,$A0,$01 ; -
-	.byte $40,$08,$00,$01 ; --
-  .byte $42,$00,$00,$81 ; ---
-  .byte $42,$00,$20,$81 ; ----
-  .byte $42,$08,$20,$01 ; -----
-	.byte $40,$08,$20,$01 ; ------ 
-  .byte $40,$08,$20,$81 ; -----
-  .byte $42,$08,$00,$81 ; ----
-  .byte $42,$00,$00,$81 ; ---
-  .byte $40,$00,$20,$01 ; --
-  .byte $40,$0A,$A0,$01 ; -
-	.byte $55,$55,$55,$55 ; HERE
+	.byte $00,$00,$00,$00
+  .byte $00,$00,$00,$00
+  .byte $55,$55,$55,$55
+  .byte $40,$0E,$A0,$01
+	.byte $40,$08,$00,$01
+  .byte $42,$00,$00,$81
+  .byte $C2,$00,$20,$83
+  .byte $42,$08,$20,$01
+	.byte $40,$08,$20,$01
+  .byte $40,$08,$20,$81
+  .byte $C2,$08,$00,$83
+  .byte $42,$00,$00,$81
+  .byte $40,$00,$20,$01
+  .byte $40,$0A,$B0,$01
+	.byte $55,$55,$55,$55
 
 .export BackgroundData
 
