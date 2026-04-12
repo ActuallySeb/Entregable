@@ -170,8 +170,8 @@ DecompressBG:
   CPX #32
   BNE @init2
 
-  LDA PPUSTATUS
-  LDA #$20
+  LDA PPUSTATUS ; reset PPU latch
+  LDA #$20      ; nametable $2000
   STA PPUADDR
   LDA #$00
   STA PPUADDR
@@ -181,11 +181,11 @@ DecompressBG:
 
 vblankwait:
   BIT PPUSTATUS
-  BPL vblankwait
+  BPL vblankwait ; wait for another vblank before continuing
 
-  LDA #%10000000
+  LDA #%10000000 ; enable NMI, background uses pattern table $0000
   STA PPUCTRL
-  LDA #%00011110
+  LDA #%00011110 ; enable background + sprites
   STA PPUMASK
 
 main_loop:
