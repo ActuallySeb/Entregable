@@ -35,6 +35,15 @@
   @no_xor_y:
   STA coin_y
 
+  CMP #30
+  BCS @skip_bound_y
+
+  LDA #$A0
+  STA coin_y
+
+  JMP @randomize_y
+
+  @skip_bound_y:
   JSR check_coin_BG_overlay
   LDX #0
 

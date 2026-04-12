@@ -8,5 +8,9 @@ src/main.o
 src/player.o
 src/reset.o
 src/subroutines.o
-game.nes
 src/coin.o
+src/bodyblock.o
+src/damage.o
+src/enemy.o
+src/UI.o
+game.nes

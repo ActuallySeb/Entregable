@@ -158,7 +158,7 @@ Collision_tiles:                .res 4
 
   LDY temp1
   STA Collision_tiles, Y
-  STA $0330,Y
+  ; STA $0330,Y
   INC temp1
 
   PLA
