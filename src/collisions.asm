@@ -58,13 +58,12 @@ Collision_tiles:                .res 2
 
   @right:
     INC MXindex
+    JSR over_underflow_MXindex
+
     JSR get_tile
 
     INC MYindex
     JSR get_tile
-
-    DEC MXindex
-    DEC MYindex
 
     JMP @exit
 
@@ -74,17 +73,15 @@ Collision_tiles:                .res 2
     INC MYindex
     JSR get_tile
 
-    DEC MYindex
-
     JMP @exit
 
   @up:
     JSR get_tile
 
     INC MXindex
-    JSR get_tile
+    JSR over_underflow_MXindex
 
-    DEC MXindex
+    JSR get_tile
 
     JMP @exit
 
@@ -93,10 +90,8 @@ Collision_tiles:                .res 2
     JSR get_tile
 
     INC MXindex
+    JSR over_underflow_MXindex
     JSR get_tile
-
-    DEC MYindex
-    DEC MXindex
 
     JMP @exit
 
@@ -163,5 +158,30 @@ Collision_tiles:                .res 2
   PLA
   TAY
 
+  RTS
+.endproc
+
+.proc over_underflow_MXindex
+  LDA MXindex
+  CMP #$FF
+  BEQ @underflow
+
+  LDA MXindex
+  CMP #16
+  BEQ @overflow
+
+  JMP @exit_over_under
+
+  @overflow:
+  LDA #0
+  STA MXindex
+
+  JMP @exit_over_under
+
+  @underflow:
+  LDA #15
+  STA MXindex
+
+  @exit_over_under:
   RTS
 .endproc
