@@ -41,7 +41,7 @@ prev_pads:                         .res 1
 .exportzp temp1, temp2, tile_bit_mask
 
 .segment "CODE"
-.import decompress, set_attr_table, update_animation, read_controllers, move_sprite, draw_player
+.import decompress, set_attr_table, update_animation, read_controllers, update_player, move_sprite, draw_player
 
 .proc irq_handler
   RTI
@@ -123,8 +123,9 @@ load_palettes:
   CPX #32
   BNE @init
 
-  LDA #$cc
+  LDA #$D0
   STA sprite_x
+  LDA #$c6
   STA sprite_y
 DecompressBG:
   LDX #$00
@@ -166,7 +167,7 @@ main_loop:
   STA temp1
   STA temp2
 
-  JSR move_sprite
+  JSR update_player
 
   JSR draw_player
 

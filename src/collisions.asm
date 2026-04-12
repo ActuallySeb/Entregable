@@ -2,11 +2,14 @@
 .import BackgroundData
 
 .segment "ZEROPAGE"
-Collision_tiles:                .res 2
+; Collision_tiles:                .res 2
 
-.importzp MXindex, MYindex, index, sprite_x, sprite_y, pads
+; .exportzp Collision_tiles
+.importzp MXindex, MYindex, index, sprite_x, sprite_y, pads, temp1
 
 .segment "CODE"
+.export position_to_Mindex, get_collision_tile
+
 .proc position_to_Mindex
   LDA sprite_x
 
@@ -15,7 +18,7 @@ Collision_tiles:                .res 2
   LSR
   LSR
 
-  STA MXindex
+  STA MXindex ; used as metatile per row
 
   LDA sprite_y
 
@@ -28,51 +31,152 @@ Collision_tiles:                .res 2
 
   JSR get_collision_tile
 
+  RTS
+.endproc
+
+.proc get_collision_tile
+  LDA #0
+  STA temp1
+
+  LDA pads
+  AND #BTN_RIGHT
+  BNE @right
+
+  LDA pads
+  AND #BTN_LEFT
+  BNE @left
+
+  LDA pads
+  AND #BTN_UP
+  BNE @up
+
+  LDA pads
+  AND #BTN_DOWN
+  BNE @down
+
+  JMP @exit
+
+  @right:
+    INC MXindex
+    JSR get_tile
+
+    INC MYindex
+    JSR get_tile
+
+    DEC MXindex
+    DEC MYindex
+
+    JMP @exit
+
+  @left:
+    JSR get_tile
+
+    INC MYindex
+    JSR get_tile
+
+    DEC MYindex
+
+    JMP @exit
+
+  @up:
+    JSR get_tile
+
+    INC MXindex
+    JSR get_tile
+
+    DEC MXindex
+
+    JMP @exit
+
+  @down:
+    INC MYindex
+    JSR get_tile
+
+    INC MXindex
+    JSR get_tile
+
+    DEC MYindex
+    DEC MXindex
+
+    JMP @exit
+
+  @exit:
+  LDA #0
+  STA temp1
+
+  RTS
+.endproc
+
+.proc get_tile
   LDA MYindex
+  STA $0310
   ASL
   ASL
   STA index
 
   LDA MXindex
+  STA $0311
+  LSR
   LSR
   CLC
   ADC index
 
   STA index
 
-  RTS
-.endproc
+  TYA
+  PHA
+  TXA
+  PHA
 
-.proc get_collision_tile
-  LDA pads
-  AND BTN_RIGHT
-  BEQ @right
-
-  AND BTN_LEFT
-  BEQ @left
-
-  AND BTN_UP
-  BEQ @up
-
-  AND BTN_DOWN
-  BEQ @down
-
-  @right:
-    INC MXindex
-    JMP @exit
-
-  @left:
-    DEC MXindex
-    JMP @exit
+  LDY index
+  LDA MXindex
+  AND #%00000011
+  ; @reduce_below_4:
+  ; CMP #4
+  ; BCC @retrieve
   
-  @up:
-    DEC MYindex
-    JMP @exit
-  
-  @down:
-    INC MYindex
-    JMP @exit
+  ; SEC
+  ; SBC #4
+  ; JMP @reduce_below_4
 
-  @exit:
+  @retrieve:
+  TAX
+  STA $0315
+  LDA BackgroundData, Y
+  STA $0305
+
+  @shift_left:
+  CPX #0
+  BEQ @mask
+
+  ASL
+  ASL
+
+  DEX
+  JMP @shift_left
+  
+  @mask:
+  AND #%11000000
+  STA $0306
+
+  LSR
+  LSR
+  LSR
+  LSR
+  LSR
+  LSR
+
+  STA $0307
+
+  LDY temp1
+  STA Collision_tiles, Y
+  STA $0304
+  INY
+
+  PLA
+  TAX
+  PLA
+  TAY
+
   RTS
 .endproc
