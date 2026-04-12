@@ -47,7 +47,7 @@ prev_pads:                         .res 1
 .exportzp temp1, temp2, tile_bit_mask, player_x, player_y, coin_x, coin_y
 
 .segment "CODE"
-.import decompress, set_attr_table, update_animation, read_controllers, update_player, move_sprite, draw_coin, check_coin_BG_overlay
+.import decompress, set_attr_table, update_animation, read_controllers, update_player, move_sprite, draw_coin, randomize_coin
 
 .proc irq_handler
   RTI
@@ -138,6 +138,7 @@ load_palettes:
   STA coin_x
   LDA #$70
   STA coin_y
+
 DecompressBG:
   LDX #$00
 @init2:
@@ -180,8 +181,8 @@ main_loop:
 
   JSR update_player
 
+  ; JSR randomize_coin
   JSR draw_coin
-  JSR check_coin_BG_overlay
 
 
 sleep_loop:
