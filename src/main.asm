@@ -5,13 +5,11 @@
 ; -- Compression --
 Y_temp:             .res 1
 
-
 ; --Decompression --
 top_half:           .res 32
 bottom_half:        .res 32
 MXindex:            .res 1
 MYindex:            .res 1
-bit_loop:           .res 1
 index:              .res 1
 sleep:              .res 1
 
@@ -22,11 +20,17 @@ player_y:           .res 1
 coin_x:             .res 1
 coin_y:             .res 1
 
+sprite_x:           .res 1
+sprite_y:           .res 1
+
 enemy_x:            .res 1
 enemy_y:            .res 1
 
-sprite_x:           .res 1
-sprite_y:           .res 1
+player_prev_x:      .res 1
+player_prev_y:      .res 1
+
+lives:              .res 1
+damage_cooldown:    .res 1
 
 tile_bit_mask:                     .res 1  ; Stores the bitmak of the current sprite being drawn
 flip_state:                        .res 1  ; Stores flip status (0 = normal, 1 = mirrored)
@@ -42,12 +46,21 @@ frame_counter:                     .res 1
 pads:                              .res 1
 prev_pads:                         .res 1
 
-.exportzp Y_temp, MXindex, MYindex, bit_loop, index, top_half, bottom_half, sprite_x, sprite_y
+.exportzp Y_temp, MXindex, MYindex, index, top_half, bottom_half, sprite_x, sprite_y
 .exportzp flip_state, frame_counter, index_sprite, pads, prev_pads, sprite_animation_state, sprite_tile_array
-.exportzp temp1, temp2, tile_bit_mask, player_x, player_y, coin_x, coin_y
+.exportzp temp1, temp2, tile_bit_mask, enemy_x, enemy_y, player_x, player_y, coin_x, coin_y
+.exportzp player_prev_x, player_prev_y, lives, damage_cooldown
+
+; .segment "CODE"
+; .import decompress, set_attr_table, update_animation, read_controllers, update_player, 
+
 
 .segment "CODE"
-.import decompress, set_attr_table, update_animation, read_controllers, update_player, move_sprite, draw_coin, randomize_coin
+.import decompress, set_attr_table, update_animation, read_controllers, update_player
+.import update_enemy, draw_enemy, draw_player, draw_coin, randomize_coin
+.import resolve_player_enemy_bodyblock, enemy_overlaps_player
+.import draw_lives_bg
+.import handle_player_damage
 
 .proc irq_handler
   RTI
@@ -56,6 +69,7 @@ prev_pads:                         .res 1
 .proc nmi_handler
   JSR update_animation
   JSR read_controllers
+  JSR draw_lives_bg
 
   LDA #$00
   STA OAMADDR
@@ -67,6 +81,11 @@ prev_pads:                         .res 1
 
   LDA #0
   STA sleep
+
+  LDA damage_cooldown
+  BEQ @no_damage_tick
+  DEC damage_cooldown
+@no_damage_tick:
 
   LDA prev_pads
   AND #BTN_START
@@ -106,12 +125,13 @@ load_palettes:
   CPX #$20
   BNE load_palettes
 
-
   LDX #$00
-  LDA 0
+  LDA #0
 @init:
   STA sprite_x
   STA sprite_y
+  STA enemy_x
+  STA enemy_y
   STA frame_counter
   STA sprite_animation_state
   STA flip_state
@@ -119,11 +139,11 @@ load_palettes:
   STA temp2
   STA pads
   STA Pause
+  STA lives
+  STA damage_cooldown
 
-  STA bit_loop
   STA top_half, X
   STA bottom_half, X
-
 
   INX
   CPX #32
@@ -139,11 +159,23 @@ load_palettes:
   LDA #$70
   STA coin_y
 
+  ; LDA #$D0
+  ; STA sprite_x
+  ; LDA #$C6
+  ; STA sprite_y
+
+  LDA #$40
+  STA enemy_x
+  LDA #$40
+  STA enemy_y
+
+  LDA #3
+  STA lives
+
 DecompressBG:
   LDX #$00
 @init2:
   LDA #0
-  STA bit_loop
   STA top_half, X
   LDA #1
   STA bottom_half, X
@@ -152,38 +184,42 @@ DecompressBG:
   CPX #32
   BNE @init2
 
-  LDA PPUSTATUS      ; reset PPU latch
-
-  LDA #$20           ; nametable $2000
+  LDA PPUSTATUS
+  LDA #$20
   STA PPUADDR
   LDA #$00
   STA PPUADDR
 
   JSR decompress
-
   JSR set_attr_table
 
-vblankwait:       ; wait for another vblank before continuing
+vblankwait:
   BIT PPUSTATUS
   BPL vblankwait
 
-  LDA #%10000000  ; enable NMI, background uses pattern table $0000
+  LDA #%10000000
   STA PPUCTRL
-  LDA #%00011110  ; enable background + sprites
+  LDA #%00011110
   STA PPUMASK
 
 main_loop:
   LDX #0
   LDY #0
-  LDA 0
+  LDA #0
   STA temp1
   STA temp2
 
   JSR update_player
+  JSR handle_player_damage
+  JSR resolve_player_enemy_bodyblock
+  JSR update_enemy
+  JSR handle_player_damage
 
   ; JSR randomize_coin
   JSR draw_coin
 
+  ; JSR draw_player
+  JSR draw_enemy
 
 sleep_loop:
   LDA sleep
@@ -199,8 +235,6 @@ sleep_loop:
   JMP main_loop
 .endproc
 
-
-
 .segment "VECTORS"
 .addr nmi_handler, reset_handler, irq_handler
 
@@ -208,30 +242,30 @@ sleep_loop:
 palettes:
   .byte $22, $0f, $16, $27
   .byte $22, $0f, $16, $27
-  .byte $0f, $00, $00, $00
+  .byte $22, $0f, $16, $27
   .byte $22, $0f, $02, $12
 
   .byte $22, $0f, $2b, $3c
   .byte $22, $06, $17, $27
-  .byte $0f, $00, $00, $00
-  .byte $0f, $00, $00, $00
+  .byte $22, $0f, $16, $27
+  .byte $22, $0f, $16, $27
 
 BackgroundData:
-	.byte $AA,$AA,$AA,$AA
-  .byte $AA,$AA,$AA,$AA
-  .byte $55,$55,$55,$55 ; HERE
-  .byte $40,$0E,$A0,$01 ; -
-	.byte $40,$08,$00,$01 ; --
-  .byte $42,$00,$00,$81 ; ---
-  .byte $C2,$00,$20,$83 ; ----
-  .byte $02,$08,$20,$00 ; -----
-	.byte $00,$08,$20,$00 ; ------ 
-  .byte $00,$08,$20,$00 ; -----
-  .byte $C2,$08,$00,$83 ; ----
-  .byte $42,$00,$00,$81 ; ---
-  .byte $40,$00,$20,$01 ; --
-  .byte $40,$0A,$B0,$01 ; -
-	.byte $55,$55,$55,$55 ; HERE
+	.byte $00,$00,$00,$00
+  .byte $00,$00,$00,$00
+  .byte $55,$55,$55,$55
+  .byte $40,$0E,$A0,$01
+	.byte $40,$08,$00,$01
+  .byte $42,$00,$00,$81
+  .byte $C2,$00,$20,$83
+  .byte $42,$08,$20,$01
+	.byte $40,$08,$20,$01
+  .byte $40,$08,$20,$81
+  .byte $C2,$08,$00,$83
+  .byte $42,$00,$00,$81
+  .byte $40,$00,$20,$01
+  .byte $40,$0A,$B0,$01
+	.byte $55,$55,$55,$55
 
 .export BackgroundData
 

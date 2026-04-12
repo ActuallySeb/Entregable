@@ -6,7 +6,7 @@ masked_bit:            .res 1
 X_temp:                .res 1
 ; Y_temp:                .res 1
 
-.importzp Y_temp, MXindex, MYindex, bit_loop, index, top_half, bottom_half
+.importzp Y_temp, MXindex, MYindex, index, top_half, bottom_half
 
 .segment "CODE"
 .export decompress, set_attr_table
