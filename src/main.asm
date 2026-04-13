@@ -61,6 +61,7 @@ coin_counter:                      .res 1
 .import draw_lives_bg
 .import handle_player_damage
 .import handle_game_over
+.import draw_lives_bg, draw_score_bg
 
 .proc irq_handler
   RTI
@@ -70,6 +71,7 @@ coin_counter:                      .res 1
   JSR update_animation
   JSR read_controllers
   JSR draw_lives_bg
+  JSR draw_score_bg
   JSR handle_game_over
 
   LDA #$00
@@ -165,7 +167,7 @@ load_palettes:
   LDA #$70
   STA coin_y
 
-  LDA #$40
+  LDA #$D0
   STA enemy_x
   LDA #$40
   STA enemy_y
