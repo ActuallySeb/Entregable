@@ -46,13 +46,12 @@ frame_counter:                     .res 1
 pads:                              .res 1
 prev_pads:                         .res 1
 
+coin_counter:                      .res 1
+
 .exportzp Y_temp, MXindex, MYindex, index, top_half, bottom_half, sprite_x, sprite_y
 .exportzp flip_state, frame_counter, index_sprite, pads, prev_pads, sprite_animation_state, sprite_tile_array
 .exportzp temp1, temp2, tile_bit_mask, enemy_x, enemy_y, player_x, player_y, coin_x, coin_y
-.exportzp player_prev_x, player_prev_y, lives, damage_cooldown
-
-; .segment "CODE"
-; .import decompress, set_attr_table, update_animation, read_controllers, update_player, 
+.exportzp player_prev_x, player_prev_y, lives, damage_cooldown, coin_counter
 
 
 .segment "CODE"
@@ -138,6 +137,7 @@ load_palettes:
   STA temp1
   STA temp2
   STA pads
+  STA coin_counter
   STA Pause
   STA lives
   STA damage_cooldown

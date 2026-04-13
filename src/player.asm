@@ -3,7 +3,7 @@
 .segment "ZEROPAGE"
 .importzp player_prev_x, player_prev_y
 
-.importzp sprite_x, sprite_y, pads, flip_state, Collision_tiles, player_x, player_y
+.importzp sprite_x, sprite_y, pads, flip_state, Collision_tiles, player_x, player_y, coin_counter
 
 .segment "CODE"
 .import walk_cycle, rear_cycle, forward_cycle, idle, check_player_BG_collisions
@@ -33,6 +33,7 @@
   STA player_y
   
   JSR randomize_coin
+  INC coin_counter
 
   LDA player_x
   STA sprite_x
