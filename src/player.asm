@@ -8,7 +8,7 @@
 
 .segment "CODE"
 .import walk_cycle, rear_cycle, forward_cycle, idle, check_player_BG_collisions
-.import BG_collision_damage, randomize_coin, player_overlaps_coin
+.import BG_collision_damage, randomize_coin, player_overlaps_coin, scale_speed
 .export update_player, move_sprite
 
 
@@ -35,6 +35,8 @@
   
   JSR randomize_coin
   INC coin_counter
+
+  JSR scale_speed
 
   LDA player_x
   STA sprite_x

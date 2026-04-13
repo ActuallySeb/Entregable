@@ -49,8 +49,9 @@ pads:                              .res 1
 prev_pads:                         .res 1
 
 coin_counter:                      .res 1
+scale_factor:                      .res 1
 
-.exportzp Y_temp, MXindex, MYindex, index, top_half, bottom_half, sprite_x, sprite_y
+.exportzp Y_temp, MXindex, MYindex, index, top_half, bottom_half, sprite_x, sprite_y, scale_factor
 .exportzp flip_state, frame_counter, index_sprite, pads, prev_pads, sprite_animation_state, sprite_tile_array
 .exportzp temp1, temp2, tile_bit_mask, enemy_x, enemy_y, player_x, player_y, coin_x, coin_y
 .exportzp player_prev_x, player_prev_y, lives, damage_cooldown, coin_counter, player_speed, enemy_speed
@@ -154,6 +155,7 @@ load_palettes:
 
   LDA #2
   STA player_speed
+  STA scale_factor
   
   LDA #1
   STA enemy_speed
