@@ -14,3 +14,4 @@ src/damage.o
 src/enemy.o
 src/UI.o
 game.nes
+src/gameover.o
