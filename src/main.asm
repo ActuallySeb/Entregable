@@ -31,6 +31,7 @@ player_prev_y:      .res 1
 
 lives:              .res 1
 damage_cooldown:    .res 1
+game_over_drawn:    .res 1
 
 tile_bit_mask:                     .res 1  ; Stores the bitmak of the current sprite being drawn
 flip_state:                        .res 1  ; Stores flip status (0 = normal, 1 = mirrored)
@@ -51,8 +52,7 @@ coin_counter:                      .res 1
 .exportzp Y_temp, MXindex, MYindex, index, top_half, bottom_half, sprite_x, sprite_y
 .exportzp flip_state, frame_counter, index_sprite, pads, prev_pads, sprite_animation_state, sprite_tile_array
 .exportzp temp1, temp2, tile_bit_mask, enemy_x, enemy_y, player_x, player_y, coin_x, coin_y
-.exportzp player_prev_x, player_prev_y, lives, damage_cooldown, coin_counter
-
+.exportzp player_prev_x, player_prev_y, lives, damage_cooldown, coin_counter, game_over_drawn
 
 .segment "CODE"
 .import decompress, set_attr_table, update_animation, read_controllers, update_player
@@ -60,6 +60,7 @@ coin_counter:                      .res 1
 .import resolve_player_enemy_bodyblock, enemy_overlaps_player
 .import draw_lives_bg
 .import handle_player_damage
+.import handle_game_over
 
 .proc irq_handler
   RTI
@@ -69,6 +70,7 @@ coin_counter:                      .res 1
   JSR update_animation
   JSR read_controllers
   JSR draw_lives_bg
+  JSR handle_game_over
 
   LDA #$00
   STA OAMADDR
@@ -85,6 +87,9 @@ coin_counter:                      .res 1
   BEQ @no_damage_tick
   DEC damage_cooldown
 @no_damage_tick:
+
+  LDA lives
+  BEQ @no_pause
 
   LDA prev_pads
   AND #BTN_START
@@ -141,6 +146,7 @@ load_palettes:
   STA Pause
   STA lives
   STA damage_cooldown
+  STA game_over_drawn
 
   STA top_half, X
   STA bottom_half, X
