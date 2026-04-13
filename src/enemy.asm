@@ -10,7 +10,7 @@ enemy_index:              .res 1
 enemy_temp1:              .res 1
 EnemyCollision_tiles:     .res 2
 
-.importzp enemy_x, enemy_y, sprite_x, sprite_y, frame_counter, temp2
+.importzp enemy_x, enemy_y, player_x, player_y, frame_counter, temp2
 
 .segment "CODE"
 .import enemy_overlaps_player, handle_player_damage
@@ -100,7 +100,7 @@ EnemyCollision_tiles:     .res 2
   STA enemy_y
 
 @check_bodyblock:
-  JSR enemy_overlaps_player
+  ; JSR enemy_overlaps_player
   BEQ @done
 
   JSR handle_player_damage
@@ -116,7 +116,7 @@ EnemyCollision_tiles:     .res 2
 
 .proc move_enemy_x
   LDA enemy_x
-  CMP sprite_x
+  CMP player_x
   BEQ @exit_move_x
   BCC @move_right
 
@@ -133,7 +133,7 @@ EnemyCollision_tiles:     .res 2
 
 .proc move_enemy_y
   LDA enemy_y
-  CMP sprite_y
+  CMP player_y
   BEQ @exit_move_y
   BCC @move_down
 
@@ -150,8 +150,6 @@ EnemyCollision_tiles:     .res 2
 
 .proc position_to_enemy_Mindex
   LDA enemy_x
-  CLC
-  ADC #4
   LSR
   LSR
   LSR
@@ -159,8 +157,6 @@ EnemyCollision_tiles:     .res 2
   STA enemy_mt_x
 
   LDA enemy_y
-  CLC
-  ADC #4
   LSR
   LSR
   LSR
