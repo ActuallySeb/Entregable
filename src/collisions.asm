@@ -5,7 +5,7 @@
 Collision_tiles:                .res 4
 
 .exportzp Collision_tiles
-.importzp MXindex, MYindex, index, sprite_x, sprite_y, pads, temp1, player_x, player_y, coin_x, coin_y
+.importzp MXindex, MYindex, index, sprite_x, sprite_y, prev_pads, temp1, player_x, player_y, coin_x, coin_y
 
 .segment "CODE"
 .export check_player_BG_collisions, check_coin_BG_overlay
@@ -47,19 +47,19 @@ Collision_tiles:                .res 4
 .endproc
 
 .proc get_collision_tile
-  LDA pads
+  LDA prev_pads
   AND #BTN_RIGHT
   BNE @right
 
-  LDA pads
+  LDA prev_pads
   AND #BTN_LEFT
   BNE @left
 
-  LDA pads
+  LDA prev_pads
   AND #BTN_UP
   BNE @up
 
-  LDA pads
+  LDA prev_pads
   AND #BTN_DOWN
   BNE @down
 
