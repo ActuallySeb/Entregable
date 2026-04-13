@@ -3,11 +3,12 @@
 .segment "ZEROPAGE"
 .importzp player_prev_x, player_prev_y
 
-.importzp sprite_x, sprite_y, pads, flip_state, Collision_tiles, player_x, player_y, coin_counter
+.importzp sprite_x, sprite_y, prev_pads, flip_state, Collision_tiles
+.importzp player_x, player_y, player_speed, coin_counter
 
 .segment "CODE"
 .import walk_cycle, rear_cycle, forward_cycle, idle, check_player_BG_collisions
-.import BG_collision_damage, randomize_coin, player_overlaps_coin
+.import BG_collision_damage, randomize_coin, player_overlaps_coin, scale_speed
 .export update_player, move_sprite
 
 
@@ -34,6 +35,8 @@
   
   JSR randomize_coin
   INC coin_counter
+
+  JSR scale_speed
 
   LDA player_x
   STA sprite_x
@@ -81,19 +84,19 @@
 .endproc
 
 .proc move_sprite
-  LDA pads
+  LDA prev_pads
   AND #BTN_RIGHT
   BNE @move_right
 
-  LDA pads
+  LDA prev_pads
   AND #BTN_LEFT
   BNE @move_left
 
-  LDA pads
+  LDA prev_pads
   AND #BTN_UP
   BNE @move_up
 
-  LDA pads
+  LDA prev_pads
   AND #BTN_DOWN
   BNE @move_down
 
@@ -121,7 +124,7 @@
 .proc move_left
   LDA sprite_x
   SEC
-  SBC #2
+  SBC player_speed
   STA sprite_x
 
   RTS
@@ -130,7 +133,7 @@
 .proc move_right
   LDA sprite_x
   CLC
-  ADC #2
+  ADC player_speed
   STA sprite_x
 
   RTS
@@ -139,7 +142,7 @@
 .proc move_up
   LDA sprite_y
   SEC
-  SBC #2
+  SBC player_speed
   STA sprite_y
 
   RTS
@@ -148,22 +151,22 @@
 .proc move_down
   LDA sprite_y
   CLC
-  ADC #2
+  ADC player_speed
   STA sprite_y
 
   RTS
 .endproc
 
 .proc draw_player
-  LDA pads
+  LDA prev_pads
   AND #(BTN_RIGHT | BTN_LEFT)
   BNE @draw_horizontal
 
-  LDA pads
+  LDA prev_pads
   AND #BTN_UP
   BNE @draw_up
 
-  LDA pads
+  LDA prev_pads
   AND #BTN_DOWN
   BNE @draw_down
 
@@ -172,7 +175,7 @@
   JMP @exit_draw
 
   @draw_horizontal:
-    LDA pads
+    LDA prev_pads
     AND #BTN_RIGHT
     BNE @draw_right
 

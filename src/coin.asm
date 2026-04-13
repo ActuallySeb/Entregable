@@ -1,10 +1,10 @@
 .segment  "ZEROPAGE"
-.importzp tile_bit_mask, sprite_tile_array, frame_counter
-.importzp sprite_x, coin_x, sprite_y, coin_y, Collision_tiles
+.importzp tile_bit_mask, sprite_tile_array, frame_counter, coin_counter, player_speed, enemy_speed
+.importzp sprite_x, coin_x, sprite_y, coin_y, Collision_tiles, scale_factor
 
 .segment "CODE"
 .import draw_2x2, check_coin_BG_overlay
-.export draw_coin, randomize_coin
+.export draw_coin, randomize_coin,scale_speed
 
 .proc randomize_coin
   @randomize_x:
@@ -56,6 +56,24 @@
   CPX #4
   BNE @check_y_boundaries
 
+  RTS
+.endproc
+
+.proc scale_speed
+  LDA coin_counter
+  AND scale_factor
+  BNE @exit_scale
+
+  INC player_speed
+  INC enemy_speed
+
+  LDA scale_factor
+  CMP #4
+  BEQ @exit_scale
+
+  INC scale_factor
+
+  @exit_scale:
   RTS
 .endproc
 

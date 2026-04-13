@@ -13,8 +13,11 @@ temp_controls:           .res 1
 .proc read_controllers
   ; Store previously red controller inputs
   LDA pads
+  BEQ @skip_prev
+
   STA prev_pads
 
+  @skip_prev:
   ; Read new inputs
   LDA #$01
   STA CONTROLLER1

@@ -10,7 +10,7 @@ enemy_index:              .res 1
 enemy_temp1:              .res 1
 EnemyCollision_tiles:     .res 2
 
-.importzp enemy_x, enemy_y, player_x, player_y, frame_counter, temp2
+.importzp enemy_x, enemy_y, player_x, player_y, frame_counter, temp2, enemy_speed
 
 .segment "CODE"
 .import enemy_overlaps_player, handle_player_damage
@@ -121,11 +121,17 @@ EnemyCollision_tiles:     .res 2
   BCC @move_right
 
   @move_left:
-    DEC enemy_x
+    LDA enemy_x
+    SEC
+    SBC enemy_speed
+    STA enemy_x
     RTS
 
   @move_right:
-    INC enemy_x
+    LDA enemy_x
+    CLC
+    ADC enemy_speed
+    STA enemy_x
 
   @exit_move_x:
     RTS
@@ -138,11 +144,17 @@ EnemyCollision_tiles:     .res 2
   BCC @move_down
 
   @move_up:
-    DEC enemy_y
+    LDA enemy_y
+    SEC
+    SBC enemy_speed
+    STA enemy_y
     RTS
 
   @move_down:
-    INC enemy_y
+    LDA enemy_y
+    CLC
+    ADC enemy_speed
+    STA enemy_y
 
   @exit_move_y:
     RTS

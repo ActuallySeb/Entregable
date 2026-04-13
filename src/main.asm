@@ -16,6 +16,7 @@ sleep:              .res 1
 ; -- Sprites --
 player_x:           .res 1
 player_y:           .res 1
+player_speed:       .res 1
 
 coin_x:             .res 1
 coin_y:             .res 1
@@ -25,6 +26,7 @@ sprite_y:           .res 1
 
 enemy_x:            .res 1
 enemy_y:            .res 1
+enemy_speed:        .res 1
 
 player_prev_x:      .res 1
 player_prev_y:      .res 1
@@ -48,11 +50,13 @@ pads:                              .res 1
 prev_pads:                         .res 1
 
 coin_counter:                      .res 1
+scale_factor:                      .res 1
 
-.exportzp Y_temp, MXindex, MYindex, index, top_half, bottom_half, sprite_x, sprite_y
+.exportzp Y_temp, MXindex, MYindex, index, top_half, bottom_half, sprite_x, sprite_y, scale_factor
 .exportzp flip_state, frame_counter, index_sprite, pads, prev_pads, sprite_animation_state, sprite_tile_array
 .exportzp temp1, temp2, tile_bit_mask, enemy_x, enemy_y, player_x, player_y, coin_x, coin_y
-.exportzp player_prev_x, player_prev_y, lives, damage_cooldown, coin_counter, game_over_drawn
+.exportzp player_prev_x, player_prev_y, lives, damage_cooldown, coin_counter, player_speed, enemy_speed, game_over_drawn
+
 
 .segment "CODE"
 .import decompress, set_attr_table, update_animation, read_controllers, update_player
@@ -144,6 +148,7 @@ load_palettes:
   STA temp1
   STA temp2
   STA pads
+  STA prev_pads
   STA coin_counter
   STA Pause
   STA lives
@@ -156,6 +161,13 @@ load_palettes:
   INX
   CPX #32
   BNE @init
+
+  LDA #2
+  STA player_speed
+  STA scale_factor
+  
+  LDA #1
+  STA enemy_speed
 
   LDA #$30
   STA player_x
