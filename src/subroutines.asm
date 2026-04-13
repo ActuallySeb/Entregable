@@ -339,7 +339,7 @@ ExtractLoop:
   STA PPUADDR
   LDA #$D8
   STA PPUADDR
-  LDA #%00000011
+  LDA #%00000000
   STA PPUDATA
 
   LDA PPUSTATUS
@@ -395,7 +395,7 @@ ExtractLoop:
   STA PPUADDR
   LDA #$DF
   STA PPUADDR
-  LDA #%00001100
+  LDA #%00000000
   STA PPUDATA
 
   ; --- Row 5 & 6 Attributes ---
@@ -452,7 +452,7 @@ ExtractLoop:
   STA PPUADDR
   LDA #$E8
   STA PPUADDR
-  LDA #%00000011
+  LDA #%00000000
   STA PPUDATA
 
   LDA PPUSTATUS
@@ -508,7 +508,7 @@ ExtractLoop:
   STA PPUADDR
   LDA #$EF
   STA PPUADDR
-  LDA #%00001100
+  LDA #%00000000
   STA PPUDATA
 
   ; --- Final Row Cleanup ---
