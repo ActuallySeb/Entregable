@@ -6,7 +6,7 @@
 .importzp sprite_x, sprite_y, pads, flip_state, Collision_tiles, player_x, player_y
 
 .segment "CODE"
-.import walk_cycle, rear_cycle, forward_cycle, idle, check_player_BG_collisions
+.import walk_cycle, rear_cycle, forward_cycle, idle, check_player_BG_collisions, BG_collision_damage
 .export update_player, move_sprite
 
 
@@ -40,6 +40,16 @@
     STA sprite_x
     LDA player_prev_y
     STA sprite_y
+
+    LDA Collision_tiles, X
+    CMP #2
+    BEQ @exit_update
+
+    LDA Collision_tiles, X
+    CMP #3
+    BEQ @exit_update
+
+    JSR BG_collision_damage
 
   @exit_update:
     LDA sprite_x
