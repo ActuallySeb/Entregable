@@ -33,6 +33,7 @@ player_prev_y:      .res 1
 
 lives:              .res 1
 damage_cooldown:    .res 1
+game_over_drawn:    .res 1
 
 tile_bit_mask:                     .res 1  ; Stores the bitmak of the current sprite being drawn
 flip_state:                        .res 1  ; Stores flip status (0 = normal, 1 = mirrored)
@@ -54,7 +55,7 @@ scale_factor:                      .res 1
 .exportzp Y_temp, MXindex, MYindex, index, top_half, bottom_half, sprite_x, sprite_y, scale_factor
 .exportzp flip_state, frame_counter, index_sprite, pads, prev_pads, sprite_animation_state, sprite_tile_array
 .exportzp temp1, temp2, tile_bit_mask, enemy_x, enemy_y, player_x, player_y, coin_x, coin_y
-.exportzp player_prev_x, player_prev_y, lives, damage_cooldown, coin_counter, player_speed, enemy_speed
+.exportzp player_prev_x, player_prev_y, lives, damage_cooldown, coin_counter, player_speed, enemy_speed, game_over_drawn
 
 
 .segment "CODE"
@@ -63,6 +64,7 @@ scale_factor:                      .res 1
 .import resolve_player_enemy_bodyblock, enemy_overlaps_player
 .import draw_lives_bg
 .import handle_player_damage
+.import handle_game_over
 
 .proc irq_handler
   RTI
@@ -72,6 +74,7 @@ scale_factor:                      .res 1
   JSR update_animation
   JSR read_controllers
   JSR draw_lives_bg
+  JSR handle_game_over
 
   LDA #$00
   STA OAMADDR
@@ -88,6 +91,9 @@ scale_factor:                      .res 1
   BEQ @no_damage_tick
   DEC damage_cooldown
 @no_damage_tick:
+
+  LDA lives
+  BEQ @no_pause
 
   LDA prev_pads
   AND #BTN_START
@@ -145,6 +151,7 @@ load_palettes:
   STA Pause
   STA lives
   STA damage_cooldown
+  STA game_over_drawn
 
   STA top_half, X
   STA bottom_half, X
@@ -265,11 +272,11 @@ BackgroundData:
   .byte $40,$0E,$A0,$01
 	.byte $40,$08,$00,$01
   .byte $42,$00,$00,$81
-  .byte $C2,$00,$20,$83
+  .byte $42,$00,$20,$81
   .byte $42,$08,$20,$01
 	.byte $40,$08,$20,$01
   .byte $40,$08,$20,$81
-  .byte $C2,$08,$00,$83
+  .byte $42,$08,$00,$81
   .byte $42,$00,$00,$81
   .byte $40,$00,$20,$01
   .byte $40,$0A,$B0,$01
